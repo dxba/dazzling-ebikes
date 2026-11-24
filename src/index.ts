@@ -1,106 +1,204 @@
+
 /**
- * LLM Chat Application Template
- *
- * A simple chat application using Cloudflare Workers AI.
- * This template demonstrates how to implement an LLM-powered chat interface with
- * streaming responses using Server-Sent Events (SSE).
- *
- * @license MIT
+ * Dazzling E-Bikes
+ * Cloudflare Workers + Workers AI + R2 Object Storage
  */
+
 import { Env, ChatMessage } from "./types";
 
-// Model ID for Workers AI model
-// https://developers.cloudflare.com/workers-ai/models/
+// Extend existing environment with R2 binding
+type StoreEnv = Env & {
+    IMAGES: R2Bucket;
+};
+
+// Workers AI model
 const MODEL_ID = "@cf/google/gemma-4-26b-a4b-it";
 
-// Default system prompt
+// Existing chatbot system prompt
 const SYSTEM_PROMPT =
-	"You are a helpful, friendly assistant. Provide concise and accurate responses.";
+    "You are a helpful, friendly assistant. Provide concise and accurate responses.";
+
+// Approved product image filenames
+const ALLOWED_IMAGES = new Set([
+    "hero-banner.webp",
+    "urban-x1.webp",
+    "mountain-pro.webp",
+    "city-fold.webp",
+    "desert-explorer.webp",
+    "touring-elite.webp",
+    "metro-lite.webp",
+]);
 
 export default {
-	/**
-	 * Main request handler for the Worker
-	 */
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext,
-	): Promise<Response> {
-		const url = new URL(request.url);
+    async fetch(
+        request: Request,
+        env: StoreEnv,
+        ctx: ExecutionContext,
+    ): Promise<Response> {
 
-		// Handle static assets (frontend)
-		if (url.pathname === "/" || !url.pathname.startsWith("/api/")) {
-			return env.ASSETS.fetch(request);
-		}
+        const url = new URL(request.url);
 
-		// API Routes
-		if (url.pathname === "/api/chat") {
-			// Handle POST requests for chat
-			if (request.method === "POST") {
-				return handleChatRequest(request, env);
-			}
+        // ========================================
+        // 1. Retrieve product images from R2
+        // ========================================
 
-			// Method not allowed for other request types
-			return new Response("Method not allowed", { status: 405 });
-		}
+        if (url.pathname.startsWith("/images/")) {
 
-		// Handle 404 for unmatched routes
-		return new Response("Not found", { status: 404 });
-	},
-} satisfies ExportedHandler<Env>;
+            if (request.method !== "GET") {
+                return new Response("Method not allowed", {
+                    status: 405,
+                    headers: { Allow: "GET" },
+                });
+            }
 
-/**
- * Handles chat API requests
- */
+            try {
+                const imageName = url.pathname.slice("/images/".length);
+
+                if (!ALLOWED_IMAGES.has(imageName)) {
+                    return new Response("Image not found", {
+                        status: 404,
+                    });
+                }
+
+                const image = await env.IMAGES.get(imageName);
+
+                if (!image) {
+                    return new Response("Image not found", {
+                        status: 404,
+                    });
+                }
+
+                const headers = new Headers();
+
+                image.writeHttpMetadata(headers);
+
+                headers.set("Content-Type", "image/webp");
+                headers.set("Cache-Control", "public, max-age=3600");
+                headers.set("ETag", image.httpEtag);
+                headers.set("X-Content-Type-Options", "nosniff");
+
+                return new Response(image.body, {
+                    status: 200,
+                    headers,
+                });
+
+            } catch (error) {
+
+                console.error("R2 image error:", String(error));
+
+                return new Response("Failed to retrieve image", {
+                    status: 500,
+                });
+            }
+        }
+
+        // ========================================
+        // 2. Serve website static assets
+        // ========================================
+
+        if (url.pathname === "/" ||
+            !url.pathname.startsWith("/api/")) {
+
+            return env.ASSETS.fetch(request);
+        }
+
+        // ========================================
+        // 3. Handle AI chatbot requests
+        // ========================================
+
+        if (url.pathname === "/api/chat") {
+
+            if (request.method === "POST") {
+                return handleChatRequest(request, env);
+            }
+
+            return new Response("Method not allowed", {
+                status: 405,
+            });
+        }
+
+        // Unknown request
+        return new Response("Not found", {
+            status: 404,
+        });
+
+    },
+} satisfies ExportedHandler<StoreEnv>;
+
+// ========================================
+// Workers AI chatbot
+// ========================================
+
 async function handleChatRequest(
-	request: Request,
-	env: Env,
+    request: Request,
+    env: StoreEnv,
 ): Promise<Response> {
-	try {
-		// Parse JSON request body
-		const { messages = [] } = (await request.json()) as {
-			messages: ChatMessage[];
-		};
 
-		// Add system prompt if not present
-		if (!messages.some((msg) => msg.role === "system")) {
-			messages.unshift({ role: "system", content: SYSTEM_PROMPT });
-		}
+    try {
 
-		const inputs = {
-			messages,
-			max_tokens: 1024,
-			stream: true,
-		} satisfies AiTextGenerationInput & { stream: true };
+        const { messages = [] } =
+            (await request.json()) as {
+                messages: ChatMessage[];
+            };
 
-		const stream = await env.AI.run<typeof MODEL_ID>(MODEL_ID, inputs, {
-			// Uncomment to use AI Gateway
-			// gateway: {
-			//   id: "YOUR_GATEWAY_ID", // Replace with your AI Gateway ID
-			//   skipCache: false,      // Set to true to bypass cache
-			//   cacheTtl: 3600,        // Cache time-to-live in seconds
-			// },
-		});
+        if (!messages.some((msg) => msg.role === "system")) {
 
-		return new Response(stream, {
-			headers: {
-				"content-type": "text/event-stream; charset=utf-8",
-				"cache-control": "no-cache",
-				connection: "keep-alive",
-			},
-		});
-	} catch (error) {
-		console.error("AI error:", String(error));
-console.error("AI error message:",
-  error instanceof Error ? error.message : String(error));
-console.error("AI error stack:",
-  error instanceof Error ? error.stack : "");
-		return new Response(
-			JSON.stringify({ error: "Failed to process request" }),
-			{
-				status: 500,
-				headers: { "content-type": "application/json" },
-			},
-		);
-	}
+            messages.unshift({
+                role: "system",
+                content: SYSTEM_PROMPT,
+            });
+        }
+
+        const inputs = {
+            messages,
+            max_tokens: 1024,
+            stream: true,
+        } satisfies AiTextGenerationInput & { stream: true };
+
+        const stream = await env.AI.run<typeof MODEL_ID>(
+            MODEL_ID,
+            inputs,
+            {
+                // AI Gateway will be configured later
+            }
+        );
+
+        return new Response(stream, {
+            headers: {
+                "content-type": "text/event-stream; charset=utf-8",
+                "cache-control": "no-cache",
+                connection: "keep-alive",
+            },
+        });
+
+    } catch (error) {
+
+        console.error("AI error:", String(error));
+
+        console.error(
+            "AI error message:",
+            error instanceof Error
+                ? error.message
+                : String(error)
+        );
+
+        console.error(
+            "AI error stack:",
+            error instanceof Error
+                ? error.stack
+                : ""
+        );
+
+        return new Response(
+            JSON.stringify({
+                error: "Failed to process request",
+            }),
+            {
+                status: 500,
+                headers: {
+                    "content-type": "application/json",
+                },
+            }
+        );
+    }
 }
