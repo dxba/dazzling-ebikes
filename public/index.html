@@ -433,16 +433,18 @@ const products = [
   {
     id: 1,
     name: "Urban X1",
+    image: "/images/urban-x1.webp",
     category: "Urban Commuter",
     price: 2499,
     range: "60 km",
     motor: "250W",
     battery: "36V 12Ah",
     charging: "4 hours"
-  },
+},
   {
     id: 2,
     name: "Mountain Pro",
+    image: "/images/mountain-pro.webp",
     category: "Off-Road",
     price: 4999,
     range: "90 km",
@@ -453,6 +455,7 @@ const products = [
   {
     id: 3,
     name: "City Fold",
+    image: "/images/desert-explorer.webp",
     category: "Folding E-Bike",
     price: 1999,
     range: "45 km",
@@ -463,6 +466,7 @@ const products = [
   {
     id: 4,
     name: "Desert Explorer",
+    image: "/images/desert-explorer.webp",
     category: "Fat Tire Adventure",
     price: 5999,
     range: "100 km",
@@ -473,6 +477,7 @@ const products = [
   {
     id: 5,
     name: "Touring Elite",
+    image: "/images/touring-elite.webp",
     category: "Long Distance",
     price: 6499,
     range: "120 km",
@@ -483,6 +488,7 @@ const products = [
   {
     id: 6,
     name: "Metro Lite",
+    image: "/images/metro-lite.webp",
     category: "Daily Commuter",
     price: 1799,
     range: "35 km",
@@ -501,7 +507,9 @@ function money(value) {
 document.getElementById("products").innerHTML =
   products.map(p => `
     <article class="product">
-      <div class="product-visual">🚲</div>
+      <div class="product-visual">
+    <img src="${p.image}" alt="${p.name}" style="width:100%; height:100%; object-fit:contain;" loading="lazy">
+</div>
       <div class="product-info">
         <div class="category">${p.category}</div>
         <h3>${p.name}</h3>
