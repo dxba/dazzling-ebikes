@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secure Checkout | Dazzling E-Bikes</title>
+
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f5;
+    color: #17251d;
+}
+header {
+    background: #102219;
+    color: #b4ef36;
+    padding: 24px 5%;
+    font-size: 24px;
+    font-weight: bold;
+}
+.container {
+    max-width: 850px;
+    margin: 35px auto;
+    padding: 20px;
+}
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px #0000000a;
+}
+.secure {
+    background: #e8f5e9;
+    color: #176b32;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+label {
+    display: block;
+    margin: 15px 0 6px;
+    font-weight: bold;
+}
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd3ce;
+    border-radius: 7px;
+    font-size: 15px;
+}
+button {
+    background: #b4ef36;
+    color: #102219;
+    padding: 15px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+a { color: #176b32; }
+.item {
+    padding: 12px 0;
+    border-bottom: 1px solid #ddd;
+}
+.total {
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+small { color: #68756d; }
+</style>
+</head>
+
+<body>
+
+<header>⚡ DAZZLING E-BIKES</header>
+
+<div class="container">
+
+<div class="secure">
+    🔒 Secure Checkout — Cloudflare Access Demo
+</div>
+
+<div class="card">
+    <h2>Order Summary</h2>
+    <div id="order-items"></div>
+    <div class="total" id="order-total"></div>
+</div>
+
+<div class="card" id="checkout-card">
+    <h2>Customer & Delivery Details</h2>
+
+    <form id="checkout-form">
+
+        <label>Full Name</label>
+        <input type="text" required>
+
+        <label>Email Address</label>
+        <input type="email" required>
+
+        <label>Mobile Number</label>
+        <input type="tel" required>
+
+        <label>Delivery Address</label>
+        <textarea rows="4" required></textarea>
+
+        <button type="submit" id="place-order">
+            Confirm Demo Order
+        </button>
+
+        <p><small>
+        This is a demonstration.
+        No payment will be collected.
+        </small></p>
+
+    </form>
+</div>
+
+<div class="card" id="confirmation" hidden>
+    <h2>✅ Order Confirmed</h2>
+    <p>Your demonstration order was completed.</p>
+    <p id="order-id"></p>
+    <p>No payment was collected.</p>
+    <a href="/">Return to Store</a>
+</div>
+
+<p>
+    <a href="/">← Continue Shopping</a>
+    &nbsp; | &nbsp;
+    <a href="/cdn-cgi/access/logout">Logout</a>
+</p>
+
+</div>
+
+<script>
+
+let cart = [];
+
+try {
+    cart = JSON.parse(
+        sessionStorage.getItem("dazzling_cart") || "[]"
+    );
+    if (!Array.isArray(cart)) cart = [];
+} catch {
+    cart = [];
+}
+
+const items = document.getElementById("order-items");
+const totalElement = document.getElementById("order-total");
+
+let total = 0;
+
+if (!cart.length) {
+    items.textContent = "Your shopping cart is empty.";
+    document.getElementById("place-order").disabled = true;
+}
+
+cart.forEach(item => {
+
+    const product = item.product || item;
+    const quantity = Number(item.quantity || item.qty || 1);
+    const price = Number(product.price || 0);
+
+    total += price * quantity;
+
+    const row = document.createElement("div");
+    row.className = "item";
+
+    row.textContent =
+        (product.name || "Electric Bike") +
+        " × " + quantity +
+        " — AED " +
+        (price * quantity).toLocaleString();
+
+    items.appendChild(row);
+
+});
+
+totalElement.textContent =
+    "Total: AED " + total.toLocaleString();
+
+document.getElementById("checkout-form")
+.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    if (!cart.length) return;
+
+    const orderId = "DEB-" + Date.now();
+
+    document.getElementById("checkout-card").hidden = true;
+
+    document.getElementById("confirmation").hidden = false;
+
+    document.getElementById("order-id").textContent =
+        "Order Reference: " + orderId;
+
+    sessionStorage.removeItem("dazzling_cart");
+
+    cart = [];
+
+});
+
+</script>
+
+</body>
+</html>
