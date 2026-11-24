@@ -11,7 +11,7 @@ import { Env, ChatMessage } from "./types";
 
 // Model ID for Workers AI model
 // https://developers.cloudflare.com/workers-ai/models/
-const MODEL_ID = "@cf/meta/llama-3.1-8b-instruct-fp8";
+const MODEL_ID = "@cf/google/gemma-4-26b-a4b-it";
 
 // Default system prompt
 const SYSTEM_PROMPT =
@@ -90,7 +90,11 @@ async function handleChatRequest(
 			},
 		});
 	} catch (error) {
-		console.error("Error processing chat request:", error);
+		console.error("AI error:", String(error));
+console.error("AI error message:",
+  error instanceof Error ? error.message : String(error));
+console.error("AI error stack:",
+  error instanceof Error ? error.stack : "");
 		return new Response(
 			JSON.stringify({ error: "Failed to process request" }),
 			{
