@@ -1,183 +1,595 @@
+
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>LLM Chat App</title>
-		<style>
-			:root {
-				--primary-color: #f6821f;
-				--primary-hover: #e67e22;
-				--light-bg: #f9fafb;
-				--border-color: #e5e7eb;
-				--text-color: #1f2937;
-				--text-light: #6b7280;
-				--user-msg-bg: #fff2e6;
-				--assistant-msg-bg: #f3f4f6;
-			}
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dazzling E-Bikes | Ride Beyond Limits</title>
 
-			* {
-				box-sizing: border-box;
-				margin: 0;
-				padding: 0;
-			}
+<style>
+:root {
+  --green: #b5ef42;
+  --dark: #102019;
+  --light: #f4f7f5;
+  --text: #18251e;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--light);
+  color: var(--text);
+  line-height: 1.6;
+}
+button, textarea { font: inherit; }
+button { cursor: pointer; }
+nav {
+  background: var(--dark);
+  color: white;
+  padding: 20px 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.logo {
+  font-size: 23px;
+  font-weight: bold;
+  color: var(--green);
+}
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+.btn {
+  background: var(--green);
+  color: var(--dark);
+  padding: 12px 22px;
+  border: none;
+  border-radius: 7px;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn:hover { filter: brightness(.92); }
+.hero {
+  min-height: 450px;
+  padding: 80px 7%;
+  color: white;
+  background: linear-gradient(120deg,#102019,#315c42);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero h1 {
+  font-size: clamp(40px,6vw,76px);
+  line-height: 1.1;
+  margin: 20px 0;
+}
+.hero p {
+  max-width: 650px;
+  margin-bottom: 25px;
+  font-size: 19px;
+}
+.eyebrow {
+  color: var(--green);
+  letter-spacing: 3px;
+  font-size: 13px;
+  font-weight: bold;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.secondary {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+}
+.benefits {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 25px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+}
+.section {
+  max-width: 1350px;
+  margin: auto;
+  padding: 55px 5%;
+}
+.section h2 {
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+.subtitle {
+  color: #65736a;
+  margin-bottom: 30px;
+}
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: 24px;
+}
+.product {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px #0000000c;
+  border: 1px solid #e2e8e3;
+}
+.product-visual {
+  height: 210px;
+  background: linear-gradient(135deg,#e8eee8,#d0dfd4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 100px;
+}
+.product-info { padding: 22px; }
+.product-info h3 { font-size: 24px; }
+.category {
+  color: #42724e;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.specs {
+  color: #637067;
+  font-size: 14px;
+  margin: 15px 0;
+}
+.price {
+  font-size: 25px;
+  font-weight: bold;
+  margin: 15px 0;
+}
+.product .btn { width: 100%; }
+.about {
+  background: var(--dark);
+  color: white;
+  padding: 55px 7%;
+}
+.about h2 { margin-bottom: 15px; }
+footer {
+  background: #09130e;
+  color: #b6c3ba;
+  text-align: center;
+  padding: 30px 20px 100px;
+  font-size: 14px;
+}
+#chat-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  border: none;
+  border-radius: 35px;
+  padding: 17px 24px;
+  background: var(--dark);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 6px 25px #0003;
+}
+.chat-container {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  width: 390px;
+  max-width: calc(100vw - 48px);
+  height: 520px;
+  max-height: calc(100dvh - 120px);
+  background: white;
+  border: 1px solid #dce4dd;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 12px 45px #0003;
+  display: none;
+  flex-direction: column;
+  z-index: 101;
+}
+.chat-container.open { display: flex; }
+.chat-header {
+  background: var(--dark);
+  color: white;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chat-header small {
+  color: var(--green);
+  display: block;
+}
+.close-button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 24px;
+}
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  background: #f5f7f5;
+}
+.message {
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  max-width: 88%;
+  font-size: 14px;
+}
+.message p {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+.user-message {
+  background: #ddf4bc;
+  margin-left: auto;
+}
+.assistant-message {
+  background: #e8ede9;
+}
+.message-input {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid #ddd;
+}
+#user-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: none;
+}
+#send-button {
+  background: var(--dark);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  margin-left: 8px;
+  padding: 0 14px;
+}
+#send-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.typing-indicator {
+  display: none;
+  padding: 10px 15px;
+  color: #68756b;
+  font-size: 13px;
+  font-style: italic;
+}
+.typing-indicator.visible { display: block; }
+dialog {
+  border: none;
+  border-radius: 14px;
+  padding: 25px;
+  width: 450px;
+  max-width: 90vw;
+  max-height: 85vh;
+  margin: auto;
+  overflow: auto;
+}
+dialog::backdrop { background: #0008; }
+.cart-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #ddd;
+  padding: 14px 0;
+}
+.cart-row button {
+  border: none;
+  background: #fbe8e8;
+  color: #a32222;
+  padding: 6px 10px;
+  border-radius: 5px;
+}
+#cart-total { margin: 20px 0; }
+.demo-note {
+  font-size: 12px;
+  color: #65736a;
+  margin-top: 15px;
+}
+@media(max-width:600px) {
+  nav { justify-content: center; }
+  .hero { padding: 50px 6%; }
+  .chat-container { right: 12px; max-width: calc(100vw - 24px); }
+  #chat-toggle { right: 12px; }
+}
+</style>
+</head>
 
-			body {
-				font-family:
-					-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-					Cantarell, sans-serif;
-				line-height: 1.6;
-				color: var(--text-color);
-				max-width: 800px;
-				margin: 0 auto;
-				padding: 1rem;
-			}
+<body>
 
-			header {
-				text-align: center;
-				margin-bottom: 2rem;
-				padding: 1rem 0;
-				border-bottom: 1px solid var(--border-color);
-			}
+<nav>
+  <div class="logo">⚡ DAZZLING E-BIKES</div>
+  <div>
+    <a href="#">Home</a>
+    <a href="#shop">Shop</a>
+    <a href="#about">About</a>
+  </div>
+  <button class="btn" onclick="openCart()">
+    🛒 Cart (<span id="cart-count">0</span>)
+  </button>
+</nav>
 
-			h1 {
-				font-size: 1.5rem;
-				color: var(--primary-color);
-			}
+<section class="hero">
+  <div class="eyebrow">NEXT GENERATION ELECTRIC MOBILITY</div>
+  <h1>Ride Beyond<br>Limits.</h1>
+  <p>
+    Discover powerful, sustainable and intelligent
+    electric bikes engineered for your lifestyle.
+  </p>
+  <div class="hero-actions">
+    <a class="btn" href="#shop">Explore Collection</a>
+    <button class="btn secondary" onclick="toggleChat(true)">
+      Ask Our AI Assistant
+    </button>
+  </div>
+</section>
 
-			.chat-container {
-				display: flex;
-				flex-direction: column;
-				height: calc(100vh - 200px);
-				min-height: 400px;
-				border: 1px solid var(--border-color);
-				border-radius: 8px;
-				overflow: hidden;
-			}
+<section class="benefits">
+  <span>⚡ Electric Performance</span>
+  <span>🌱 Sustainable Mobility</span>
+  <span>🤖 AI Shopping Assistant</span>
+  <span>🇦🇪 UAE Demo Store</span>
+</section>
 
-			.chat-messages {
-				flex: 1;
-				overflow-y: auto;
-				padding: 1rem;
-				background-color: var(--light-bg);
-			}
+<section class="section" id="shop">
+  <h2>Explore Our Collection</h2>
+  <p class="subtitle">
+    Find the perfect electric bike for your next adventure.
+  </p>
+  <div class="products" id="products"></div>
+</section>
 
-			.message {
-				margin-bottom: 1rem;
-				padding: 0.75rem;
-				border-radius: 8px;
-				max-width: 80%;
-			}
+<section class="about" id="about">
+  <h2>Intelligent Mobility. Powered by Cloudflare.</h2>
+  <p>
+    Dazzling E-Bikes combines modern electric mobility
+    with an AI-powered shopping experience.
+    Our demonstration platform runs on Cloudflare Workers
+    and Cloudflare Workers AI.
+  </p>
+</section>
 
-			.message p {
-				white-space: pre-line;
-				margin: 0;
-				overflow-wrap: anywhere;
-			}
+<footer>
+  <p>© 2026 Dazzling E-Bikes</p>
+  <p>Powered by Cloudflare Workers &amp; Workers AI</p>
+  <p>Demonstration website. No real payments or orders.</p>
+</footer>
 
-			.user-message {
-				background-color: var(--user-msg-bg);
-				align-self: flex-end;
-				margin-left: auto;
-			}
+<button id="chat-toggle" onclick="toggleChat()">
+  🤖 Chat with Dazzling AI
+</button>
 
-			.assistant-message {
-				background-color: var(--assistant-msg-bg);
-				align-self: flex-start;
-			}
+<div class="chat-container" id="chat-panel">
+  <div class="chat-header">
+    <div>
+      <strong>Dazzling AI Assistant</strong>
+      <small>Powered by Cloudflare Workers AI</small>
+    </div>
+    <button class="close-button" aria-label="Close chat"
+      onclick="toggleChat(false)">×</button>
+  </div>
 
-			.message-input {
-				display: flex;
-				padding: 0.75rem;
-				border-top: 1px solid var(--border-color);
-				background-color: white;
-			}
+  <div id="chat-messages" class="chat-messages">
+    <div class="message assistant-message">
+      <p>
+        Hello! Welcome to Dazzling E-Bikes.
+        I'm your AI shopping assistant.
+        How can I help you today?
+      </p>
+    </div>
+  </div>
 
-			#user-input {
-				flex: 1;
-				padding: 0.75rem;
-				border: 1px solid var(--border-color);
-				border-radius: 4px;
-				font-family: inherit;
-				resize: none;
-				min-height: 44px;
-			}
+  <div class="typing-indicator" id="typing-indicator">
+    AI is thinking...
+  </div>
 
-			#send-button {
-				margin-left: 0.5rem;
-				padding: 0 1rem;
-				background-color: var(--primary-color);
-				color: white;
-				border: none;
-				border-radius: 4px;
-				cursor: pointer;
-				transition: background-color 0.2s;
-			}
+  <div class="message-input">
+    <textarea id="user-input"
+      placeholder="Ask about our electric bikes..."
+      rows="1"></textarea>
+    <button id="send-button">Send</button>
+  </div>
+</div>
 
-			#send-button:hover {
-				background-color: var(--primary-hover);
-			}
+<dialog id="cart-dialog">
+  <h2>Your Shopping Cart</h2>
+  <div id="cart-items"></div>
+  <h3 id="cart-total">Total: AED 0</h3>
+  <button class="btn" onclick="checkout()">
+    Demo Checkout
+  </button>
+  <button class="btn" onclick="closeCart()">
+    Continue Shopping
+  </button>
+  <p class="demo-note">
+    This is a demonstration. No payment will be collected.
+  </p>
+</dialog>
 
-			#send-button:disabled {
-				background-color: var(--text-light);
-				cursor: not-allowed;
-			}
+<script>
+const products = [
+  {
+    id: 1,
+    name: "Urban X1",
+    category: "Urban Commuter",
+    price: 2499,
+    range: "60 km",
+    motor: "250W",
+    battery: "36V 12Ah",
+    charging: "4 hours"
+  },
+  {
+    id: 2,
+    name: "Mountain Pro",
+    category: "Off-Road",
+    price: 4999,
+    range: "90 km",
+    motor: "750W",
+    battery: "48V 20Ah",
+    charging: "6 hours"
+  },
+  {
+    id: 3,
+    name: "City Fold",
+    category: "Folding E-Bike",
+    price: 1999,
+    range: "45 km",
+    motor: "250W",
+    battery: "36V 10Ah",
+    charging: "3 hours"
+  },
+  {
+    id: 4,
+    name: "Desert Explorer",
+    category: "Fat Tire Adventure",
+    price: 5999,
+    range: "100 km",
+    motor: "1000W",
+    battery: "52V 20Ah",
+    charging: "7 hours"
+  },
+  {
+    id: 5,
+    name: "Touring Elite",
+    category: "Long Distance",
+    price: 6499,
+    range: "120 km",
+    motor: "500W",
+    battery: "48V 25Ah",
+    charging: "7 hours"
+  },
+  {
+    id: 6,
+    name: "Metro Lite",
+    category: "Daily Commuter",
+    price: 1799,
+    range: "35 km",
+    motor: "250W",
+    battery: "36V 8Ah",
+    charging: "3 hours"
+  }
+];
 
-			.typing-indicator {
-				display: none;
-				font-style: italic;
-				color: var(--text-light);
-				padding: 1rem;
-			}
+let cart = [];
 
-			.typing-indicator.visible {
-				display: block;
-			}
+function money(value) {
+  return "AED " + value.toLocaleString("en-AE");
+}
 
-			footer {
-				margin-top: 1rem;
-				text-align: center;
-				font-size: 0.85rem;
-				color: var(--text-light);
-			}
-		</style>
-	</head>
-	<body>
-		<header>
-			<h1>Cloudflare AI Chat</h1>
-			<p>Powered by Cloudflare Workers AI</p>
-		</header>
+document.getElementById("products").innerHTML =
+  products.map(p => `
+    <article class="product">
+      <div class="product-visual">🚲</div>
+      <div class="product-info">
+        <div class="category">${p.category}</div>
+        <h3>${p.name}</h3>
+        <div class="specs">
+          ⚡ Motor: ${p.motor}<br>
+          🔋 Battery: ${p.battery}<br>
+          📍 Range: ${p.range}<br>
+          🔌 Charging: ${p.charging}
+        </div>
+        <div class="price">${money(p.price)}</div>
+        <button class="btn" onclick="addToCart(${p.id})">
+          Add to Cart
+        </button>
+      </div>
+    </article>
+  `).join("");
 
-		<div class="chat-container">
-			<div id="chat-messages" class="chat-messages">
-				<div class="message assistant-message">
-					<p>
-						Hello! I'm an LLM chat app powered by Cloudflare Workers AI. How can
-						I help you today?
-					</p>
-				</div>
-			</div>
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+  cart.push(product);
+  updateCart();
+  openCart();
+}
 
-			<div class="typing-indicator" id="typing-indicator">
-				AI is thinking...
-			</div>
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateCart();
+}
 
-			<div class="message-input">
-				<textarea
-					id="user-input"
-					placeholder="Type your message here..."
-					rows="1"
-					autofocus
-				></textarea>
-				<button id="send-button">Send</button>
-			</div>
-		</div>
+function updateCart() {
+  document.getElementById("cart-count").textContent =
+    cart.length;
 
-		<footer>
-			<p>Cloudflare Workers AI Chat Template &copy; 2025</p>
-		</footer>
+  document.getElementById("cart-items").innerHTML =
+    cart.length ? cart.map((p, i) => `
+      <div class="cart-row">
+        <div>
+          <strong>${p.name}</strong><br>
+          ${money(p.price)}
+        </div>
+        <button onclick="removeFromCart(${i})">
+          Remove
+        </button>
+      </div>
+    `).join("") : "<p>Your cart is empty.</p>";
 
-		<!-- Chat app script -->
-		<script src="chat.js"></script>
-	</body>
+  const total = cart.reduce((sum,p) => sum + p.price,0);
+  document.getElementById("cart-total").textContent =
+    "Total: " + money(total);
+}
+
+function openCart() {
+  updateCart();
+  const dialog = document.getElementById("cart-dialog");
+  if (!dialog.open) dialog.showModal();
+}
+
+function closeCart() {
+  document.getElementById("cart-dialog").close();
+}
+
+function checkout() {
+  if (!cart.length) {
+    alert("Your shopping cart is empty.");
+    return;
+  }
+  alert("Demo order completed successfully. No payment was collected.");
+  cart = [];
+  updateCart();
+  closeCart();
+}
+
+function toggleChat(force) {
+  const panel = document.getElementById("chat-panel");
+  if (typeof force === "boolean") {
+    panel.classList.toggle("open", force);
+  } else {
+    panel.classList.toggle("open");
+  }
+  if (panel.classList.contains("open")) {
+    document.getElementById("user-input").focus();
+  }
+}
+</script>
+
+<!-- Preserve existing Cloudflare chatbot functionality -->
+<script src="chat.js"></script>
+
+</body>
 </html>
