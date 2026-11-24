@@ -27,5 +27,12 @@
             "bucket_name": "dazzling-ebikes-images"
         }
     ],
-    "upload_source_maps": true
+    "workers_dev": true,
+"routes": [
+    {
+        "pattern": "shop.forwee.id",
+        "custom_domain": true
+    }
+],
+"upload_source_maps": true
 }
