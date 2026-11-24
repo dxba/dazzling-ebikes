@@ -59,6 +59,27 @@ export default {
                         status: 404,
                     });
                 }
+const cacheUrl = new URL(request.url);
+cacheUrl.search = "";
+
+const cacheKey = new Request(cacheUrl.toString(), {
+    method: "GET",
+});
+
+const cache = caches.default;
+
+const cachedResponse = await cache.match(cacheKey);
+
+if (cachedResponse) {
+    const headers = new Headers(cachedResponse.headers);
+
+    headers.set("X-Cache-Status", "HIT");
+
+    return new Response(cachedResponse.body, {
+        status: cachedResponse.status,
+        headers,
+    });
+}
 
                 const image = await env.IMAGES.get(imageName);
 
@@ -77,10 +98,25 @@ export default {
                 headers.set("ETag", image.httpEtag);
                 headers.set("X-Content-Type-Options", "nosniff");
 
-                return new Response(image.body, {
-                    status: 200,
-                    headers,
-                });
+headers.set(
+    "Cache-Control",
+    "public, max-age=3600"
+);
+
+headers.set("X-Cache-Status", "MISS");
+
+const response = new Response(image.body, {
+    status: 200,
+    headers,
+});
+
+ctx.waitUntil(
+    cache.put(cacheKey, response.clone()).catch(error => {
+        console.error("Cache write error:", String(error));
+    })
+);
+
+return response;
 
             } catch (error) {
 
