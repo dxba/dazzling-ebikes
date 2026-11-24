@@ -573,14 +573,19 @@ function closeCart() {
 }
 
 function checkout() {
-  if (!cart.length) {
-    alert("Your shopping cart is empty.");
-    return;
-  }
-  alert("Demo order completed successfully. No payment was collected.");
-  cart = [];
-  updateCart();
-  closeCart();
+    if (!cart.length) {
+        alert("Your shopping cart is empty.");
+        return;
+    }
+
+    sessionStorage.setItem(
+        "dazzling_cart",
+        JSON.stringify(cart)
+    );
+
+    closeCart();
+
+    window.location.href = "/checkout";
 }
 
 function toggleChat(force) {
